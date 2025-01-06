@@ -1,6 +1,7 @@
 package clients.cashier;
 
 
+
 /**
  * The Cashier Controller
  */
@@ -25,9 +26,9 @@ public class CashierController
    * Check interaction from view
    * @param pn The product number to be checked
    */
-  public void doCheck( String pn )
+  public void doCheck( String pn , String amountChosen )
   {
-    model.doCheck(pn);
+    model.doCheck(pn , amountChosen);
   }
 
    /**
@@ -38,6 +39,13 @@ public class CashierController
     model.doBuy();
   }
   
+  public void doDiscount()
+  {
+	  model.doDiscount();
+	  
+  }
+ 
+  
    /**
    * Bought interaction from view
    */
@@ -45,4 +53,12 @@ public class CashierController
   {
     model.doBought();
   }
+  
+  
+  public void doClear()
+  {
+    model.doClear();
+  }
 }
+
+ 

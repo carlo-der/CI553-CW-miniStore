@@ -1,6 +1,7 @@
 package clients.cashier;
 
 import catalogue.Basket;
+import catalogue.BetterBasket;
 import catalogue.Product;
 import debug.DEBUG;
 import middle.*;
@@ -54,12 +55,12 @@ public class CashierModel extends Observable
    * Check if the product is in Stock
    * @param productNum The product number
    */
-  public void doCheck(String productNum )
+  public void doCheck(String productNum , String amountChosen )
   {
     String theAction = "";
     theState  = State.process;                  // State process
     pn  = productNum.trim();                    // Product no.
-    int    amount  = 1;                         //  & quantity
+    int    amount  = Integer.valueOf(amountChosen);                         //  & quantity
     try
     {
       if ( theStock.exists( pn ) )              // Stock Exists?
@@ -70,7 +71,7 @@ public class CashierModel extends Observable
           theAction =                           //   Display 
             String.format( "%s : %7.2f (%2d) ", //
               pr.getDescription(),              //    description
-              pr.getPrice(),                    //    price
+              pr.getPrice() * amount,                    //    price
               pr.getQuantity() );               //    quantity     
           theProduct = pr;                      //   Remember prod.
           theProduct.setQuantity( amount );     //    & quantity
@@ -91,6 +92,8 @@ public class CashierModel extends Observable
     }
     setChanged(); notifyObservers(theAction);
   }
+  
+ 
 
   /**
    * Buy the product
@@ -129,6 +132,71 @@ public class CashierModel extends Observable
     setChanged(); notifyObservers(theAction);
   }
   
+  
+  
+   //public void doDiscount() {
+	  //  String theAction = "";
+	                             //  & quantity
+	  //  try
+	   // {
+	     
+	    //	  if(theBasket != null && !theBasket.isEmpty()) {
+	    		  
+	    	//  Product lastProduct = theBasket.get(theBasket.size()-1);
+	    	//  double storePrice = lastProduct.getPrice();
+	    	//  double discountPrice = storePrice * 0.90;
+	    	  
+	    	//  lastProduct.setPrice(discountPrice);  //using last product enables the discount to be 
+	    	  										// added to items already in the basket
+	    	  
+	    	 // theAction = "10% Discount applied" ;
+	    	  
+	    	  
+	    	 // }  else {
+	    		//  theAction=("No products to apply discount to");
+	    	//  }
+	      
+	   // } catch (Exception e) {
+	    	
+	    //	DEBUG.error("%s\n%s", "Cashier.model.doDiscount", e.getMessage());
+	   // 	theAction = "Error applying discount: " + e.getMessage();
+	   // }
+	    
+	//    theState = State.process;
+	//    setChanged(); notifyObservers(theAction);
+	      
+ // }
+  
+  
+  public void doDiscount() {
+	    String theAction = "";
+
+	    try {
+	        if (theBasket != null && !theBasket.isEmpty()) {
+	            // Apply 10% discount to each item's price
+	            for (Product product : theBasket) {  // For loop to apply discount to every item in the basket
+	                double storePrice = product.getPrice();
+	                double discountPrice = storePrice * 0.90; //calculates new product price if the button is clicked
+	                product.setPrice(discountPrice); //assigns the product price to discounted variable
+
+	                // Update theAction to visually display the discount per item
+	                
+	            }
+	            theAction += String.format("Discount applied"); //Shows that the discount has been applied at the top of the view
+	            
+	        } else {
+	            theAction = "No products to apply discount to.";
+	        }
+	    } catch (Exception e) {
+	        DEBUG.error("%s\n%s", "Cashier.model.doDiscount", e.getMessage());
+	        theAction = "Error applying discount: " + e.getMessage();
+	    }
+
+	    theState = State.process;
+	    setChanged();
+	    notifyObservers(theAction);
+	}
+  
   /**
    * Customer pays for the contents of the basket
    */
@@ -155,6 +223,15 @@ public class CashierModel extends Observable
     }
     theBasket = null;
     setChanged(); notifyObservers(theAction); // Notify
+  }
+  
+  public void doClear()
+  {
+    String theAction = "";
+    theBasket.clear();                        // Clear s. list
+    theAction = "Basket Cleared";       // Set display
+                          
+    setChanged(); notifyObservers(theAction);
   }
 
   /**
@@ -190,9 +267,9 @@ public class CashierModel extends Observable
    * return an instance of a new Basket
    * @return an instance of a new Basket
    */
-  protected Basket makeBasket()
+  protected BetterBasket makeBasket()
   {
-    return new Basket();
+    return new BetterBasket();
   }
 }
   

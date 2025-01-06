@@ -6,6 +6,9 @@ import java.util.Currency;
 import java.util.Formatter;
 import java.util.Locale;
 
+import clients.cashier.CashierModel;
+import debug.DEBUG;
+
 /**
  * A collection of products,
  * used to record the products that are to be wished to be purchased.
@@ -17,6 +20,8 @@ public class Basket extends ArrayList<Product> implements Serializable
 {
   private static final long serialVersionUID = 1;
   private int    theOrderNum = 0;          // Order number
+  private double theDiscount = 10.0;
+  private boolean isDiscountApplied = false;
   
   /**
    * Constructor for a basket which is
@@ -25,6 +30,8 @@ public class Basket extends ArrayList<Product> implements Serializable
   public Basket()
   {
     theOrderNum  = 0;
+    theDiscount = 10.0;
+    
   }
   
   /**
@@ -60,6 +67,15 @@ public class Basket extends ArrayList<Product> implements Serializable
     return super.add( pr );     // Call add in ArrayList
   }
 
+  
+  public void setDiscount(double discount) {
+      this.theDiscount = discount;  // Set discount value
+      this.isDiscountApplied = true;  // Mark that discount is applied
+  }
+  
+  public boolean getDiscount() {
+	  return isDiscountApplied;
+  }
   /**
    * Returns a description of the products in the basket suitable for printing.
    * @return a string description of the basket products
@@ -71,6 +87,7 @@ public class Basket extends ArrayList<Product> implements Serializable
     Formatter     fr = new Formatter(sb, uk);
     String csign = (Currency.getInstance( uk )).getSymbol();
     double total = 0.00;
+    double discountTotal = 0.00;
     if ( theOrderNum != 0 )
       fr.format( "Order number: %03d\n", theOrderNum );
       
@@ -86,11 +103,33 @@ public class Basket extends ArrayList<Product> implements Serializable
         fr.format("\n");
         total += pr.getPrice() * number;
       }
-      fr.format("----------------------------\n");
-      fr.format("Total                       ");
-      fr.format("%s%7.2f\n",    csign, total );
+      
+     
+      
+      if (isDiscountApplied) {
+          discountTotal = total * (1 - theDiscount / 100);  // Apply discount
+          fr.format("----------------------------\n");
+          fr.format("Total                       ");
+          fr.format("%s%7.2f\n", csign, total);  // Original total price
+          fr.format("Discount (" + theDiscount + "%) applied\n");  // Display discount
+          fr.format("----------------------------\n");
+          fr.format("Discounted Total             ");
+          fr.format("%s%7.2f\n", csign, "-",discountTotal);  // Discounted total price
+      } else {
+          fr.format("----------------------------\n");
+          fr.format("Total                       ");
+          fr.format("%s%7.2f\n", csign, total);  // Original total price without discount
+      }
+      
       fr.close();
     }
     return sb.toString();
   }
+  
+  
+  
+  
+  
+  
 }
+

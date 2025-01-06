@@ -2,6 +2,7 @@ package clients.customer;
 
 import catalogue.Basket;
 import catalogue.Product;
+import dbAccess.StockR;
 import debug.DEBUG;
 import middle.MiddleFactory;
 import middle.OrderProcessing;
@@ -9,6 +10,9 @@ import middle.StockException;
 import middle.StockReader;
 
 import javax.swing.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 
 /**
@@ -55,37 +59,60 @@ public class CustomerModel extends Observable
    * Check if the product is in Stock
    * @param productNum The product number
    */
-  public void doCheck(String productNum )
+  public void doCheck(String keyword, String amountChosen  )
   {
     theBasket.clear();                          // Clear s. list
     String theAction = "";
-    pn  = productNum.trim();                    // Product no.
-    int    amount  = 1;                         //  & quantity
+    keyword  = keyword.trim();                    // Product no.
+    int    amount  = Integer.valueOf(amountChosen);     						//  & quantity
+    ArrayList<Product> matchingproduct = new ArrayList<>();
+    
     try
     {
-      if ( theStock.exists( pn ) )              // Stock Exists?
+      if ( theStock.exists( keyword ) )              // Stock Exists?
       {                                         // T
-        Product pr = theStock.getDetails( pn ); //  Product
+        Product pr = theStock.getDetails( keyword ); //  Product
         if ( pr.getQuantity() >= amount )       //  In stock?
         { 
           theAction =                           //   Display 
             String.format( "%s : %7.2f (%2d) ", //
               pr.getDescription(),              //    description
-              pr.getPrice(),                    //    price
+              pr.getPrice() * amount, 
+              //    price
               pr.getQuantity() );               //    quantity
           pr.setQuantity( amount );             //   Require 1
           theBasket.add( pr );                  //   Add to basket
-          thePic = theStock.getImage( pn );     //    product
+          thePic = theStock.getImage( keyword );     //    product
         } else {                                //  F
           theAction =                           //   Inform
             pr.getDescription() +               //    product not
-            " not in stock" ;                   //    in stock
+            " not in stock" ; }                   //    in stock
         }
-      } else {                                  // F
-        theAction =                             //  Inform Unknown
-          "Unknown product number " + pn;       //  product number
+        
+       else { 
+    	   
+    	   matchingproduct = StockR.searchByKeyword(keyword);
+    	   if(!matchingproduct.isEmpty()) {
+    		   StringBuilder actionBuilder = new StringBuilder();
+    		   for (Product pr : matchingproduct) {
+    			   actionBuilder.append(String.format("\n%s : %7.2f (%2d) ", 
+    					   
+    					   pr.getDescription(),
+                           pr.getPrice(),
+                           pr.getQuantity()));
+    			   pr.setQuantity( amount );             //   Require 1
+    		          theBasket.add( pr );                  //   Add to basket
+    		          thePic = theStock.getImage( keyword );
+    		   }
+    		   theAction = actionBuilder.toString();
+    	   } else {
+    		   theAction =                             //  Inform Unknown
+    			          "Unknown product keyword / number " + keyword;   
+    	   }
+            //  product number
       }
-    } catch( StockException e )
+    } 
+    catch( StockException e )
     {
       DEBUG.error("CustomerClient.doCheck()\n%s",
       e.getMessage() );
@@ -93,7 +120,9 @@ public class CustomerModel extends Observable
     setChanged(); notifyObservers(theAction);
   }
 
-  /**
+ 
+
+/**
    * Clear the products from the basket
    */
   public void doClear()

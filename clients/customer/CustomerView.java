@@ -29,6 +29,7 @@ public class CustomerView implements Observer
   private final JLabel      pageTitle  = new JLabel();
   private final JLabel      theAction  = new JLabel();
   private final JTextField  theInput   = new JTextField();
+  private final JTextField  theInputamount   = new JTextField();
   private final JTextArea   theOutput  = new JTextArea();
   private final JScrollPane theSP      = new JScrollPane();
   private final JButton     theBtCheck = new JButton( Name.CHECK );
@@ -69,21 +70,30 @@ public class CustomerView implements Observer
 
     theBtCheck.setBounds( 16, 25+60*0, 80, 40 );    // Check button
     theBtCheck.addActionListener(                   // Call back code
-      e -> cont.doCheck( theInput.getText() ) );
-    cp.add( theBtCheck );                           //  Add to canvas
+      e -> cont.doCheck( theInput.getText(), theInputamount.getText() ) );
+    cp.add( theBtCheck );      
+    
+ 
 
-    theBtClear.setBounds( 16, 25+60*1, 80, 40 );    // Clear button
+    theBtClear.setBounds( 16, 25+60*2, 80, 40 );    // Clear button
     theBtClear.addActionListener(                   // Call back code
       e -> cont.doClear() );
     cp.add( theBtClear );                           //  Add to canvas
+    
+    
+   
 
     theAction.setBounds( 110, 25 , 270, 20 );       // Message area
     theAction.setText( " " );                       // blank
     cp.add( theAction );                            //  Add to canvas
 
-    theInput.setBounds( 110, 50, 270, 40 );         // Product no area
+    theInput.setBounds( 110, 50, 120, 40 );         // Product no area
     theInput.setText("");                           // Blank
-    cp.add( theInput );                             //  Add to canvas
+    cp.add( theInput );   							//  Add to canvas
+    
+    theInputamount.setBounds( 260, 50, 120, 40 );         // Input Area
+    theInputamount.setText("");                           // Blank
+    cp.add( theInputamount ); 
     
     theSP.setBounds( 110, 100, 270, 160 );          // Scrolling pane
     theOutput.setText( "" );                        //  Blank

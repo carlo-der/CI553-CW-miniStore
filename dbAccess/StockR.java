@@ -8,12 +8,16 @@ package dbAccess;
  */
 
 import catalogue.Product;
+
 import debug.DEBUG;
 import middle.StockException;
 import middle.StockReader;
 
 import javax.swing.*;
+
+
 import java.sql.*;
+import java.util.ArrayList;
 
 // There can only be 1 ResultSet opened per statement
 // so no simultaneous use of the statement object
@@ -27,7 +31,7 @@ import java.sql.*;
   */
 public class StockR implements StockReader
 {
-  private Connection theCon    = null;      // Connection to database
+  private static Connection theCon    = null;      // Connection to database
   private Statement  theStmt   = null;      // Statement object
 
   /**
@@ -78,7 +82,7 @@ public class StockR implements StockReader
    * @return a connection object
    */
 
-  protected Connection getConnectionObject()
+  public static Connection getConnectionObject()
   {
     return theCon;
   }
@@ -119,7 +123,7 @@ public class StockR implements StockReader
   {
     try
     {
-      Product   dt = new Product( "0", "", 0.00, 0 );
+      Product   dt = new Product( "0", "", 0.00, 0, 0 );
       ResultSet rs = getStatementObject().executeQuery(
         "select description, price, stockLevel " +
         "  from ProductTable, StockTable " +
@@ -172,4 +176,37 @@ public class StockR implements StockReader
     return new ImageIcon( filename );
   }
 
-}
+  
+  public synchronized static ArrayList<Product> searchByKeyword(String keyword) throws StockException {
+	  ArrayList<Product> result = new ArrayList<>();
+	  try {
+		  String sql = "SELECT ProductTable.productNo, ProductTable.description, ProductTable.price, " +
+                  "StockTable.stockLevel " +
+                  "FROM ProductTable " +
+                  "JOIN StockTable ON ProductTable.productNo = StockTable.productNo " +
+                  "WHERE LOWER(ProductTable.description) LIKE ?";
+		  
+		 PreparedStatement pstatement = getConnectionObject().prepareStatement(sql);
+		 pstatement.setString(1,"%" + keyword.toLowerCase() + "%");
+		 
+		 ResultSet rs = pstatement.executeQuery();
+		 
+		 while (rs.next()) {
+	            Product product = new Product(
+	                rs.getString("productNo"),       // Product number
+	                rs.getString("description"),    // Description
+	                rs.getDouble("price"),          // Price
+	                rs.getInt("stockLevel"),        // Stock level
+	                0                               // Reserved quantity (default to 0)
+	            );
+	            result.add(product);
+	  }
+		 rs.close();
+		 pstatement.close();
+	  
+  } catch (SQLException e) {
+	  throw new StockException ("SQL searchByKeyword: " + e.getMessage());
+  } return result;
+
+  
+  }}

@@ -24,10 +24,12 @@ public class CustomerController
    * Check interaction from view
    * @param pn The product number to be checked
    */
-  public void doCheck( String pn )
+  public void doCheck( String pn , String amountChosen)
   {
-    model.doCheck(pn);
+    model.doCheck(pn, amountChosen );
   }
+  
+  
 
   /**
    * Clear interaction from view
